@@ -15,6 +15,8 @@ namespace Proyecto_con_MySQL
     public partial class Form1 : Form
     {
         public string cadena_conexion = "Database=agenda;Data Source=localhost;User Id=grupo2;Password=grupo2";
+        public string usuario_modificar;
+         
         public Form1()
         {
             InitializeComponent();
@@ -35,10 +37,9 @@ namespace Proyecto_con_MySQL
                 dataGridView1.DataSource = ds;
                 dataGridView1.DataMember = "agenda";
             }
-            catch (MySqlException)
+            catch
             {
-                MessageBox.Show("Error de conexion", "Error!", MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+
             }
         }
 
@@ -84,7 +85,7 @@ namespace Proyecto_con_MySQL
                 dataGridView1.DataSource = ds;
                 dataGridView1.DataMember = "agenda";
             }
-            catch (MySqlException)
+            catch 
             {
                 MessageBox.Show("Ya existe el usuario", "Alerta!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -105,11 +106,142 @@ namespace Proyecto_con_MySQL
             textBox1.Focus();
             button7.Visible = false;
             button11.Visible = true;
+
+            usuario_modificar = textBox1.Text.ToString();
+          
         }
 
         private void button9_Click(object sender, EventArgs e)
         {
+           try
+            {
+                string consult = "SELECT * From usuarios WHERE idusuario = " + textBox3.Text + "";
+                MySqlConnection coneccion = new MySqlConnection(cadena_conexion);
+                MySqlDataAdapter comand = new MySqlDataAdapter(consult, coneccion);
+
+                System.Data.DataSet ds = new System.Data.DataSet();
+
+                comand.Fill(ds, "agenda");
+
+                dataGridView1.DataSource = ds;
+                dataGridView1.DataMember = "agenda";
+
+                MySqlConnection myConnetion = new MySqlConnection(cadena_conexion);
+                string myInsertQuery = "select * from usuarios where idusuario = " + textBox3.Text + "";
+                MySqlCommand myCommand = new MySqlCommand(myInsertQuery, myConnetion);
+
+                myCommand.Connection = myConnetion;
+                myConnetion.Open();
+
+                MySqlDataReader myReader;
+                myReader = myCommand.ExecuteReader();
+
+                if (myReader.Read())
+                {
+                    textBox1.Text = (myReader.GetString(1));
+                    textBox2.Text = (myReader.GetString(2));
+                    comboBox1.Text = (myReader.GetString(3));
+
+                }
+                else
+                {
+                    MessageBox.Show("El usuario no existe", "Ok", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                myReader.Close();
+                myConnetion.Close();
+            }
+            catch (MySqlException)
+            {
+                MessageBox.Show("Campo de busqueda esta vacio", "Alerta!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
            
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MySqlConnection myConnection = new MySqlConnection(cadena_conexion);
+
+                string nombre = textBox1.Text.ToString();
+                string clave = textBox2.Text.ToString();
+                string nivel = comboBox1.Text.ToString();
+
+                string myInsertQuery = "UPDATE usuarios SET nombre = '" + nombre + "',clave = '" + clave + "',nivel = '" + nivel + "'WHERE nombre = '" + usuario_modificar + "'";
+                
+                MySqlCommand myCommand = new MySqlCommand(myInsertQuery);
+
+                myCommand.Connection = myConnection;
+                myConnection.Open();
+                myCommand.ExecuteNonQuery();
+                myCommand.Connection.Close();
+
+
+               
+              MessageBox.Show("Usuario modificado con éxito", "Ok", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                string consulta = "select * from usuarios";
+
+                MySqlConnection conexion = new MySqlConnection(cadena_conexion);
+                MySqlDataAdapter da = new MySqlDataAdapter(consulta, conexion);
+                System.Data.DataSet ds = new System.Data.DataSet();
+                da.Fill(ds, "agenda");
+                dataGridView1.DataSource = ds;
+                dataGridView1.DataMember = "agenda";
+            }
+            catch(MySqlException)
+            {
+                MessageBox.Show("Ya existe el usuario", "Alerta!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            button7.Visible = true;
+            button11.Visible = false;
+
+            textBox1.Enabled = false;
+            textBox2.Enabled = false;
+            comboBox1.Enabled = false;
+            button7.Focus();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MySqlConnection myConnection = new MySqlConnection(cadena_conexion);
+                string myInsertQuery = "DELETE From usuarios WHERE idusuario = " + textBox3.Text + "";
+                MySqlCommand myCommand = new MySqlCommand(myInsertQuery);
+
+                myCommand.Connection = myConnection;
+                myConnection.Open();
+                myCommand.ExecuteNonQuery();
+                myCommand.Connection.Close();
+
+                MessageBox.Show("Usuario eliminado con éxito", "Ok", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                string consulta = "SELECT * From usuarios";
+
+                MySqlConnection conexion = new MySqlConnection(cadena_conexion);
+                MySqlDataAdapter da = new MySqlDataAdapter(consulta, conexion);
+                System.Data.DataSet ds = new System.Data.DataSet();
+                da.Fill(ds, "agenda");
+                dataGridView1.DataSource = ds;
+                dataGridView1.DataMember = "agenda";
+
+            }
+            catch (MySqlException)
+            {
+                MessageBox.Show("Error al eliminar el usuario, primero realice la búsqueda");
+            }
+            button5.Visible = true;
+            button10.Visible = false;
+
+            textBox1.Enabled = false;
+            textBox2.Enabled = false;
+            comboBox1.Enabled = false;
         }
     }
 }
